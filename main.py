@@ -1,18 +1,16 @@
 #!/user/bin/python3
 
-# import argparse
+## USAGE
+### python3 main.py --tx-extra 0158b9e078dd8c9789be6cc38e7922679734363b87400b9a9bd2ecfd63bffc1a1902090147195636b035b6947a0000114185c0b8bbe6c88966f4393e3069a2b28a979feee27750fc8f527e7cc6ecee00000000000000000000000000000000000000000000000000000000000000000900a1bd51151cc8bc101e523e1a65f27ee83b8e69cbbfefe12320163fd4a22844d6f1595f615164cd19cab8db5c9c00b1a257acf968c6ba72a556cf0b11d3884f480049c2be24ea21c5c91008081ccf401b5a26552b8572bde2d541f8095865c9358184423d738b729f6163301e04c02cccb1fe9680dbc03afe44526856abe99ad2b76d7987b1e333850e1f097900863ba101000000
+
+import argparse
 from enum import IntFlag, auto
 
-# parser = argparse.ArgumentParser(description='Decode TX Extra')
-# parser.add_argument("--tx-extra", help="Hex string for the tx txtra to be decoded, type=string")
-# args = parser.parse_args()
+parser = argparse.ArgumentParser(description='Decode TX Extra')
+parser.add_argument("--tx-extra", required=True, help="Hex string for the tx txtra to be decoded, type=string")
+args = parser.parse_args()
 
-working_tx_extra = "0158b9e078dd8c9789be6cc38e7922679734363b87400b9a9bd2ecfd63bffc1a1902090147195636b035b6947a0000114185c0b8bbe6c88966f4393e3069a2b28a979feee27750fc8f527e7cc6ecee00000000000000000000000000000000000000000000000000000000000000000900a1bd51151cc8bc101e523e1a65f27ee83b8e69cbbfefe12320163fd4a22844d6f1595f615164cd19cab8db5c9c00b1a257acf968c6ba72a556cf0b11d3884f480049c2be24ea21c5c91008081ccf401b5a26552b8572bde2d541f8095865c9358184423d738b729f6163301e04c02cccb1fe9680dbc03afe44526856abe99ad2b76d7987b1e333850e1f097900863ba101000000"
-
-broken_tx_extra = "7a0000b6f88d6b55151ee9bad47d0a4061aff6fc2c07dc6edf68298f74520bd6b6e7ce000000000000000000000000000000000000000000000000000000000000000009003c0000000000000000ca09e1d85ac2a3000000000000000060000000000000000700000000000000e06a01f04c7f0000216b01f00600000050000000000000000049983ed5b08340400238e7df848fb6f16dc31817aa59719cafdacb42a739e9d8d3b7763304da4c6c8c16531824d531ef7a92040bdbb70cb152d1354ba5ac9bad86c7b8c3889c42656adf7900863ba101000000011aaee19c214a411baeb6562ce4af937a67c45764e6614028540ea9927ed0d3a9"
-
-# tx_extra = working_tx_extra
-tx_extra = broken_tx_extra
+tx_extra = args.tx_extra
 
 tx_extra_list = list(tx_extra)
 
@@ -131,11 +129,16 @@ def eat_ons_data():
         ons_data['encrypted_value'] = encrypted_value
     return ons_data
 
+def eat_uint64_t():
+    global tx_extra_list
+    amount = ''.join(tx_extra_list[:8*2])
+    tx_extra_list = tx_extra_list[8*2:]
+    return int.from_bytes(bytearray.fromhex(amount), "little", signed=False)
+
+
 def eat_burn():
     global tx_extra_list
-    amount = ''.join(tx_extra_list[:64*2])
-    tx_extra_list = tx_extra_list[64*2:]
-    return {"amount": amount}
+    return {"amount": eat_uint64_t()}
 
 
 
